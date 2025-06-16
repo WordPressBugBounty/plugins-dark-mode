@@ -39,40 +39,48 @@ function wpmd_is_pro_active() {
 /**
  * [wpmd_add_notice description]
  *
- * @param   string $class    get notice classes.
+ * @param   string $notice_class    get notice classes.
  * @param  string $message  get notice descriptions.
  *
  * @return  void
  */
-function wpmd_add_notice( $class, $message ) {
+function wpmd_add_notice( $notice_class, $message ) {
 
-	$notices = get_option( sanitize_key( 'wp_markdown_editor_notices' ), [] );
-	if ( is_string( $message ) && is_string( $class )
-		&& ! wp_list_filter( $notices, [ 'message' => $message ] ) ) {
+	$notices = get_option(
+		sanitize_key( 'wp_markdown_editor_notices' ),
+		array()
+	);
+	if ( is_string( $message ) && is_string( $notice_class )
+		&& ! wp_list_filter(
+			$notices,
+			array( 'message' => $message )
+		) ) {
 
-		$notices[] = [
+		$notices[] = array(
 			'message' => $message,
-			'class'   => $class,
-		];
+			'class'   => $notice_class,
+		);
 
-		update_option( sanitize_key( 'wp_markdown_editor_notices' ), $notices );
+		update_option(
+			sanitize_key( 'wp_markdown_editor_notices' ),
+			$notices
+		);
 	}
-
 }
 
 /**
  * [wpmde_get_settings description]
  *
- * @param   string $key      array key.
- * @param   string $default  default value.
- * @param   array  $section  section array.
+ * @param   string $key              array key.
+ * @param   string $default_value    default value.
+ * @param   array  $section          section array.
  *
  * @return  array
  */
-function wpmde_get_settings( $key = '', $default = '', $section = 'wpmde_general' ) {
+function wpmde_get_settings( $key = '', $default_value = '', $section = 'wpmde_general' ) {
 	$settings = get_option( $section );
 
-	return ! empty( $settings[ $key ] ) ? $settings[ $key ] : $default;
+	return ! empty( $settings[ $key ] ) ? $settings[ $key ] : $default_value;
 }
 
 /**

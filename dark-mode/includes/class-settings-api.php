@@ -5,9 +5,7 @@
  * @package WP_MARKDOWN
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit();
 
 if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 	/**
@@ -19,13 +17,13 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 *
 		 * @var array
 		 */
-		protected $settings_sections = [];
+		protected $settings_sections = array();
 		/**
 		 * Settings fields array
 		 *
 		 * @var array
 		 */
-		protected $settings_fields = [];
+		protected $settings_fields = array();
 
 		/**
 		 * Settings_API construct
@@ -33,7 +31,10 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 * @return  void
 		 */
 		public function __construct() {
-			add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
+			add_action(
+				'admin_enqueue_scripts',
+				array( $this, 'admin_enqueue_scripts' )
+			);
 		}
 
 		/**
@@ -46,7 +47,6 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			wp_enqueue_script( 'jquery' );
 
 			wp_enqueue_script( 'jquery-ui-slider' );
-
 		}
 
 		/**
@@ -105,12 +105,12 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 * @since 1.0.0
 		 */
 		public function add_field( $section, $field ) {
-			$defaults                            = [
+			$defaults                            = array(
 				'name'  => '',
 				'label' => '',
 				'desc'  => '',
 				'type'  => 'text',
-			];
+			);
 			$arg                                 = wp_parse_args( $field, $defaults );
 			$this->settings_fields[ $section ][] = $arg;
 
@@ -142,7 +142,12 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 				} else {
 					$callback = null;
 				}
-				add_settings_section( $section['id'], $section['title'], $callback, $section['id'] );
+				add_settings_section(
+					$section['id'],
+					$section['title'],
+					$callback,
+					$section['id']
+				);
 			}
 
 			// register settings fields.
@@ -153,11 +158,12 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 					$label    = isset( $option['label'] ) ? $option['label'] : '';
 					$callback = isset( $option['callback'] )
 						? $option['callback']
-						: [
+						: array(
 							$this,
 							'callback_' . $type,
-						];
-					$args     = [
+						);
+
+					$args = array(
 						'id'                => $name,
 						'class'             => isset( $option['class'] ) ? $option['class'] : $name,
 						'label_for'         => "{$section}[{$name}]",
@@ -173,14 +179,26 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 						'min'               => isset( $option['min'] ) ? $option['min'] : '',
 						'max'               => isset( $option['max'] ) ? $option['max'] : '',
 						'step'              => isset( $option['step'] ) ? $option['step'] : '',
-					];
+						'upcoming'          => isset( $option['upcoming'] ) ? $option['upcoming'] : false,
+					);
 
-					add_settings_field( "{$section}[{$name}]", $label, $callback, $section, $section, $args );
+					add_settings_field(
+						"{$section}[{$name}]",
+						$label,
+						$callback,
+						$section,
+						$section,
+						$args
+					);
 				}
 			}
 			// creates our settings in the options table.
 			foreach ( $this->settings_sections as $section ) {
-				register_setting( $section['id'], $section['id'], [ $this, 'sanitize_options' ] );
+				register_setting(
+					$section['id'],
+					$section['id'],
+					array( $this, 'sanitize_options' )
+				);
 			}
 		}
 
@@ -195,7 +213,10 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 */
 		public function get_field_description( $args ) {
 			if ( ! empty( $args['desc'] ) ) {
-				$desc = sprintf( '<p class="description">%s</p>', $args['desc'] );
+				$desc = sprintf(
+					'<p class="description">%s</p>',
+					$args['desc']
+				);
 			} else {
 				$desc = '';
 			}
@@ -214,23 +235,28 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$type        = isset( $args['type'] ) ? $args['type'] : 'text';
 			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 			$html        = sprintf(
-				'<input type="%1$s" class="%2$s-text" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type,
-				$size, $args['section'], $args['id'], $value, $placeholder
+				'<input type="%1$s" class="%2$s-text" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>',
+				$type,
+				$size,
+				$args['section'],
+				$args['id'],
+				$value,
+				$placeholder
 			);
 			$html       .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -260,22 +286,30 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$step        = ( '' === $args['step'] ) ? '' : ' step="' . $args['step'] . '"';
 			$html        = sprintf(
 				'<input type="%1$s" class="%2$s-number" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>',
-				$type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step
+				$type,
+				$size,
+				$args['section'],
+				$args['id'],
+				$value,
+				$placeholder,
+				$min,
+				$max,
+				$step
 			);
 			$html       .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -289,7 +323,10 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 */
 		public function callback_heading( $args ) {
 			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
-			$html  = sprintf( '<h2 class="wppool-settings-heading">%1$s</h2>', $value );
+			$html  = sprintf(
+				'<h2 class="wppool-settings-heading">%1$s</h2>',
+				$value
+			);
 			$html .= $this->get_field_description( $args );
 			echo wp_kses_post( $html );
 		}
@@ -302,27 +339,37 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		public function callback_checkbox( $args ) {
 			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 			$html  = '<fieldset>';
-			$html .= sprintf( '<label for="wppool-%1$s[%2$s]">', $args['section'], $args['id'] );
-			$html .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="off" />', $args['section'], $args['id'] );
+			$html .= sprintf(
+				'<label for="wppool-%1$s[%2$s]">',
+				$args['section'],
+				$args['id']
+			);
+			$html .= sprintf(
+				'<input type="hidden" name="%1$s[%2$s]" value="off" />',
+				$args['section'],
+				$args['id']
+			);
 			$html .= sprintf(
 				'<input type="checkbox" class="checkbox" id="wppool-%1$s[%2$s]" name="%1$s[%2$s]" value="on" %3$s />',
-				$args['section'], $args['id'], checked( $value, 'on', false )
+				$args['section'],
+				$args['id'],
+				checked( $value, 'on', false )
 			);
 			$html .= sprintf( '%1$s</label>', $args['desc'] );
 			$html .= '</fieldset>';
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -337,49 +384,70 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 * @version 1.0.0
 		 */
 		public function callback_switcher( $args ) {
-			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
-			$html  = '<fieldset class="switcher">';
-			$html .= sprintf( '<label for="wppool-%1$s[%2$s]">', $args['section'], $args['id'] );
+			$value       = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
+			$is_upcoming = isset( $args['upcoming'] ) && $args['upcoming'];
+
+			$html  = '<fieldset class="switcher" style="display: flex; align-items: center;">';
+			$html .= sprintf(
+				'<label for="wppool-%1$s[%2$s]" style="display: flex; align-items: center;">',
+				$args['section'],
+				$args['id']
+			);
 			$html .= sprintf(
 				'<div class="wppool-switcher">
-                <input type="hidden" name="%1$s[%2$s]" value="off" />
-                <input type="checkbox" name="%1$s[%2$s]" id="wppool-%1$s[%2$s]" value="on" %3$s/>
-                <div class="wp-dark-mode-ignore">
-                    <label for="wppool-%1$s[%2$s]"></label>
-                </div>
-            </div>',
-				$args['section'], $args['id'], checked( $value, 'on', false )
+					<input type="hidden" name="%1$s[%2$s]" value="off" />
+					<input type="checkbox" name="%1$s[%2$s]" id="wppool-%1$s[%2$s]" value="on" %3$s/>
+					<div class="wp-dark-mode-ignore">
+						<label for="wppool-%1$s[%2$s]"></label>
+					</div>
+				</div>',
+				$args['section'],
+				$args['id'],
+				checked( $value, 'on', false )
 			);
-			$html .= sprintf( '<p class="description"> %1$s</p></label>', $args['desc'] );
+
+			if ( $is_upcoming ) {
+				$html .= '<span class="upcoming-tag" style="margin-left: 12px; padding: 2px 10px; background: #f1c40f; color: #222; border-radius: 12px; font-size: 12px; font-weight: 600; letter-spacing: 1px;">Upcoming</span>';
+			}
+
+			$html .= '</label>';
+			$html .= sprintf( '<p class="description"> %1$s</p>', $args['desc'] );
 			$html .= '</fieldset>';
 
 			$allowed_html = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'fieldset' => [
+				array(
+					'fieldset' => array(
 						'class' => true,
-					],
-					'label'    => [
-						'for' => true,
-					],
-					'div'      => [
+						'style' => true,
+					),
+					'label'    => array(
+						'for'   => true,
+						'style' => true,
+					),
+					'div'      => array(
 						'class' => true,
-					],
-					'input'    => [
+					),
+					'input'    => array(
 						'type'    => true,
 						'name'    => true,
 						'id'      => true,
 						'value'   => true,
 						'checked' => true,
-					],
-					'p'        => [
+					),
+					'span'     => array(
 						'class' => true,
-					],
-				]
+						'style' => true,
+					),
+					'p'        => array(
+						'class' => true,
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_html );
 		}
+
 
 		/**
 		 * Displays a multi-checkbox for a settings field
@@ -390,38 +458,54 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		public function callback_multicheck( $args ) {
 			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
 			$html  = '<fieldset>';
-			$html .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="" />', $args['section'], $args['id'] );
+			$html .= sprintf(
+				'<input type="hidden" name="%1$s[%2$s]" value="" />',
+				$args['section'],
+				$args['id']
+			);
 			foreach ( $args['options'] as $key => $label ) {
 				$checked = isset( $value[ $key ] ) ? $value[ $key ] : '0';
-				$html   .= sprintf( '<label for="wppool-%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
-				$html    .= sprintf(
-					'<input type="checkbox" class="checkbox" id="wppool-%1$s[%2$s][%3$s]" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />',
-					$args['section'], $args['id'], $key, checked( $checked, $key, false )
+
+				$html .= sprintf(
+					'<label for="wppool-%1$s[%2$s][%3$s]">',
+					$args['section'],
+					$args['id'],
+					$key
 				);
-				$html   .= sprintf( '%1$s</label><br>', $label );
+
+				$html .= sprintf(
+					'<input type="checkbox" class="checkbox" id="wppool-%1$s[%2$s][%3$s]" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />',
+					$args['section'],
+					$args['id'],
+					$key,
+					checked( $checked, $key, false )
+				);
+
+				$html .= sprintf( '%1$s</label><br>', $label );
 			}
+
 			$html .= $this->get_field_description( $args );
 			$html .= '</fieldset>';
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-					'label' => [
+					),
+					'label' => array(
 						'for' => true,
-					],
-					'br'    => [],
-					'div'   => [
+					),
+					'br'    => array(),
+					'div'   => array(
 						'class' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -437,10 +521,18 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
 			$html  = '<fieldset>';
 			foreach ( $args['options'] as $key => $label ) {
-				$html .= sprintf( '<label for="wppool-%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
+				$html .= sprintf(
+					'<label for="wppool-%1$s[%2$s][%3$s]">',
+					$args['section'],
+					$args['id'],
+					$key
+				);
 				$html .= sprintf(
 					'<input type="radio" class="radio" id="wppool-%1$s[%2$s][%3$s]" name="%1$s[%2$s]" value="%3$s" %4$s />',
-					$args['section'], $args['id'], $key, checked( $value, $key, false )
+					$args['section'],
+					$args['id'],
+					$key,
+					checked( $value, $key, false )
 				);
 				$html .= sprintf( '%1$s</label><br>', $label );
 			}
@@ -449,64 +541,19 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
-		}
-
-		/**
-		 * Displays a image choose for a settings field
-		 *
-		 * @param array $args settings field args.
-		 */
-		public function callback_image_choose( $args ) {
-			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
-			$html  = '<fieldset class="wp-dark-mode-ignore" >';
-			foreach ( $args['options'] as $key => $label ) {
-				$html .= sprintf(
-					'<label class="image-choose-opt %4$s" for="wppool-%1$s[%2$s][%3$s]">', $args['section'], $args['id'],
-					$key, $value === $key ? 'active' : ''
-				);
-				$html .= sprintf(
-					'<input type="radio" class="radio" id="wppool-%1$s[%2$s][%3$s]" name="%1$s[%2$s]" value="%3$s" %4$s />',
-					$args['section'], $args['id'], $key, checked( $value, $key, false )
-				);
-				$html .= sprintf( '<img src="%1$s" class="image-choose-img"></label>', $label );
-			}
-			$html .= $this->get_field_description( $args );
-			$html .= '</fieldset>';
-
-			echo wp_kses( $html, [
-				'fieldset' => [
-					'class' => [],
-				],
-				'label'    => [
-					'class' => [],
-					'for'   => [],
-				],
-				'input'    => [
-					'type'    => [],
-					'class'   => [],
-					'id'      => [],
-					'name'    => [],
-					'value'   => [],
-					'checked' => [],
-				],
-				'img'      => [
-					'src'   => [],
-					'class' => [],
-				],
-			] );
 		}
 
 		/**
@@ -517,26 +564,36 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		public function callback_select( $args ) {
 			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
-			$html  = sprintf( '<select class="%1$s" name="%2$s[%3$s]" id="%2$s[%3$s]">', $size, $args['section'], $args['id'] );
+			$html  = sprintf(
+				'<select class="%1$s" name="%2$s[%3$s]" id="%2$s[%3$s]">',
+				$size,
+				$args['section'],
+				$args['id']
+			);
 			foreach ( $args['options'] as $key => $label ) {
-				$html .= sprintf( '<option value="%s"%s>%s</option>', $key, selected( $value, $key, false ), $label );
+				$html .= sprintf(
+					'<option value="%s"%s>%s</option>',
+					$key,
+					selected( $value, $key, false ),
+					$label
+				);
 			}
 			$html .= sprintf( '</select>' );
 			$html .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'select' => [
+				array(
+					'select' => array(
 						'class' => true,
 						'name'  => true,
 						'id'    => true,
-					],
-					'option' => [
+					),
+					'option' => array(
 						'value'    => true,
 						'selected' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -553,22 +610,26 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 			$html        = sprintf(
 				'<textarea rows="5" cols="55" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]"%4$s>%5$s</textarea>',
-				$size, $args['section'], $args['id'], $placeholder, $value
+				$size,
+				$args['section'],
+				$args['id'],
+				$placeholder,
+				$value
 			);
 			$html       .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'textarea' => [
+				array(
+					'textarea' => array(
 						'rows'        => true,
 						'cols'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -593,39 +654,39 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$allowed_tags = wp_kses_allowed_html( 'post' );
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input'    => [
+				array(
+					'input'    => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-					'select'   => [
+					),
+					'select'   => array(
 						'class' => true,
 						'name'  => true,
 						'id'    => true,
-					],
-					'option'   => [
+					),
+					'option'   => array(
 						'value'    => true,
 						'selected' => true,
-					],
-					'textarea' => [
+					),
+					'textarea' => array(
 						'rows'        => true,
 						'cols'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'placeholder' => true,
-					],
-					'p'        => [
+					),
+					'p'        => array(
 						'class' => true,
-					],
-					'div'      => [
+					),
+					'div'      => array(
 						'class' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $this->get_field_description( $args ), $allowed_tags );
@@ -640,24 +701,28 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
 			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : '500px';
 			echo '<div style="max-width: ' . esc_attr( $size ) . ';">';
-			$editor_settings = [
+			$editor_settings = array(
 				'teeny'         => true,
 				'textarea_name' => $args['section'] . '[' . $args['id'] . ']',
 				'textarea_rows' => 10,
-			];
+			);
 			if ( isset( $args['options'] ) && is_array( $args['options'] ) ) {
 				$editor_settings = array_merge( $editor_settings, $args['options'] );
 			}
-			wp_editor( $value, $args['section'] . '-' . $args['id'], $editor_settings );
+			wp_editor(
+				$value,
+				$args['section'] . '-' . $args['id'],
+				$editor_settings
+			);
 			echo '</div>';
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'div' => [
+				array(
+					'div' => array(
 						'style' => true,
-					],
-				]
+					),
+				)
 			);
 			echo wp_kses( $this->get_field_description( $args ), $allowed_tags );
 		}
@@ -674,33 +739,36 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$label = isset( $args['options']['button_label'] )
 				? $args['options']['button_label'] : __( 'Choose File', 'dark-mode' );
 			$html  = sprintf(
-				'<input type="text" class="%1$s-text wpsa-url" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size,
-				$args['section'], $args['id'], $value
+				'<input type="text" class="%1$s-text wpsa-url" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>',
+				$size,
+				$args['section'],
+				$args['id'],
+				$value
 			);
 			$html .= '<input type="button" class="button wpsa-browse" value="' . $label . '" />';
 			$html .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-					'p'     => [
+					),
+					'p'     => array(
 						'class' => true,
-					],
-					'div'   => [
+					),
+					'div'   => array(
 						'class' => true,
-					],
-					'label' => [
+					),
+					'label' => array(
 						'for' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -715,23 +783,26 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
 			$html  = sprintf(
-				'<input type="password" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size,
-				$args['section'], $args['id'], $value
+				'<input type="password" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>',
+				$size,
+				$args['section'],
+				$args['id'],
+				$value
 			);
 			$html .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -745,31 +816,34 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		public function callback_color( $args ) {
 			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
-			$html
-				= sprintf(
-					'<input type="text" class="%1$s-text wp-color-picker-field wppool-color-field" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />',
-					$size, $args['section'], $args['id'], $value, $args['std']
-				);
-			$html  .= $this->get_field_description( $args );
+			$html  = sprintf(
+				'<input type="text" class="%1$s-text wp-color-picker-field wppool-color-field" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />',
+				$size,
+				$args['section'],
+				$args['id'],
+				$value,
+				$args['std']
+			);
+			$html .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-					'div'   => [
+					),
+					'div'   => array(
 						'class' => true,
-					],
-					'label' => [
+					),
+					'label' => array(
 						'for' => true,
-					],
-				]
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -781,12 +855,12 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 		 * @param array $args settings field args.
 		 */
 		public function callback_pages( $args ) {
-			$dropdown_args = [
+			$dropdown_args = array(
 				'selected' => esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) ),
 				'name'     => esc_html( $args['section'] ) . esc_html( '[' . $args['id'] . ']' ),
 				'id'       => esc_html( $args['section'] ) . esc_html( '[' . $args['id'] . ']' ),
 				'echo'     => 1,
-			];
+			);
 
 			// phpcs:ignore
 			wp_dropdown_pages( $dropdown_args );
@@ -829,27 +903,39 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 
 			$html = sprintf(
 				'
-            <div class="wppool-slider" data-min="%4$s" data-max="%5$s" data-value="%6$s">
-            <input type="hidden" id="%1$s[%2$s]" name="%1$s[%2$s]" value="%3$s" />
-            <div class="wppool-slider-handle ui-slider-handle"></div>
-            </div>
-            ', $args['section'], $args['id'], $args['std'], $min, $max, $value
+			<div class="wppool-slider" data-min="%4$s" data-max="%5$s" data-value="%6$s">
+			<input type="hidden" id="%1$s[%2$s]" name="%1$s[%2$s]" value="%3$s" />
+			<div class="wppool-slider-handle ui-slider-handle"></div>
+			</div>
+			',
+				$args['section'],
+				$args['id'],
+				$args['std'],
+				$min,
+				$max,
+				$value
 			);
 
 			$html .= $this->get_field_description( $args );
 
 			$allowed_tags = array_merge(
 				wp_kses_allowed_html( 'post' ),
-				[
-					'input' => [
+				array(
+					'input' => array(
 						'type'        => true,
 						'class'       => true,
 						'id'          => true,
 						'name'        => true,
 						'value'       => true,
 						'placeholder' => true,
-					],
-				]
+					),
+					'div'   => array(
+						'class'      => true,
+						'data-min'   => true,
+						'data-max'   => true,
+						'data-value' => true,
+					),
+				)
 			);
 
 			echo wp_kses( $html, $allowed_tags );
@@ -911,7 +997,7 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 			$count = count( $this->settings_sections );
 
 			// Don't show the navigation if only one section exists.
-			if ( $count === 1 ) {
+			if ( 1 === $count ) {
 				return;
 			}
 
@@ -920,7 +1006,7 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 					return sprintf(
 						'<li><a href="#%1$s" id="%1$s-tab">%2$s</a></li>',
 						esc_attr( $tab['id'] ),
-						esc_html( $tab['title'] )
+						$tab['title'] // Don't escape HTML here since we want icons to render.
 					);
 				},
 				$this->settings_sections
@@ -930,7 +1016,7 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 
 			printf(
 				'<div class="wppool-settings-sidebar"><ul>%s</ul></div>',
-				esc_html( $escaped_nav_items )
+				wp_kses_post( $escaped_nav_items )
 			);
 		}
 
@@ -974,7 +1060,13 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 							if ( isset( $this->settings_fields[ $form['id'] ] ) ) {
 								?>
 								<div style="padding-left: 10px">
-									<?php submit_button( 'Save Settings', 'primary', 'save_settings' ); ?>
+									<?php
+									submit_button(
+										'Save Settings',
+										'primary',
+										'save_settings'
+									);
+									?>
 								</div>
 							<?php } ?>
 
@@ -1125,7 +1217,6 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 					$(document).on('click', '.container-disabled a', function (event) {
 						event.stopPropagation();
 						event.stopImmediatePropagation();
-						I
 					});
 
 				});
@@ -1304,6 +1395,10 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 					transition: all .2s ease;
 				}
 
+				.switcher label{
+					display:flex;
+				}
+
 				.switcher .wppool-switcher label {
 					height: 20px;
 					width: 20px;
@@ -1384,6 +1479,10 @@ if ( ! class_exists( 'WPPOOL_Settings_API' ) ) {
 
 				.wppool-slider .ui-slider-range {
 					background: #555 !important;
+				}
+
+				.wppool-settings .form-table td fieldset label {
+					display: flex !important;
 				}
 
 			</style>

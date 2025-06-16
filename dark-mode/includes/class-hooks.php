@@ -25,93 +25,33 @@ if ( ! class_exists( 'Dark_Mode_Hooks' ) ) {
 		 * Dark_Mode_Hooks constructor.
 		 */
 		public function __construct() {
-			add_action( 'admin_bar_menu', [ $this, 'render_admin_switcher_menu' ], 2000 );
-			add_action( 'admin_head', [ $this, 'head_scripts' ] );
+			add_action(
+				'admin_bar_menu',
+				array( $this, 'render_admin_switcher_menu' ),
+				2000
+			);
+			add_action(
+				'admin_head',
+				array( $this, 'head_scripts' )
+			);
+
 			//phpcs:ignore
-			// add_action( 'admin_footer', [ $this, 'footer_scripts' ] );
+			// add_action( 'admin_footer', array( $this, 'footer_scripts' ) );
 
-			add_action( 'admin_init', [ $this, 'display_notice' ] );
-
-			add_action( 'wp_ajax_wp_markdown_editor_update_notice', [ $this, 'handle_update_notice' ] );
-			add_action( 'wp_ajax_wp_markdown_editor_review_notice', [ $this, 'handle_review_notice' ] );
-			add_action( 'wp_ajax_wp_markdown_editor_affiliate_notice', [ $this, 'handle_affiliate_notice' ] );
-
-			add_action( 'wppool_after_settings', [ $this, 'pro_promo' ] );
-
+			add_action(
+				'wp_ajax_wp_markdown_editor_update_notice',
+				array( $this, 'handle_update_notice' )
+			);
 		}
 
-		/**
-		 * Promo for pro plugin
-		 *
-		 * @return  void
-		 */
-		public function pro_promo() {
-			include_once DARK_MODE_INCLUDES . '/promo.php';
-		}
-
-		/**
-		 * Handle review notice.
-		 */
-		public function handle_review_notice() {
-
-			// Checks WordPress Nonce.
-			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'wp_markdown_admin_nonce' ) ) {
-				wp_send_json_error( __( 'Invalid request', 'dark-mode' ) );
-				wp_die();
-			}
-
-			// Checks if the user has permission to do this action.
-			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_send_json_error( __( 'You do not have permission to do this action', 'dark-mode' ) );
-			}
-
-			$value = ! empty( $_REQUEST['value'] ) ? sanitize_text_field( $_REQUEST['value'] ) : 7;
-
-			if ( 'hide_notice' === $value ) {
-				update_option( 'wp_markdown_editor_review_notice_interval', 'off' );
-			} else {
-				set_transient( 'wp_markdown_editor_review_notice_interval', 'off', $value * DAY_IN_SECONDS );
-			}
-
-			update_option( sanitize_key( 'wp_markdown_editor_notices' ), [] );
-
-		}
-
-		/**
-		 * Handle affiliate notice
-		 *
-		 * @return  void
-		 */
-		public function handle_affiliate_notice() {
-			// Checks WordPress Nonce.
-			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'wp_markdown_admin_nonce' ) ) {
-				wp_send_json_error( __( 'Invalid request', 'dark-mode' ) );
-				wp_die();
-			}
-
-			// Checks if the user has permission to do this action.
-			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_send_json_error( __( 'You do not have permission to do this action', 'dark-mode' ) );
-			}
-
-			$value = ! empty( $_REQUEST['value'] ) ? sanitize_text_field( $_REQUEST['value'] ) : 7;
-
-			if ( 'hide_notice' === $value ) {
-				update_option( 'wp_markdown_editor_affiliate_notice_interval', 'off' );
-			} else {
-				set_transient( 'wp_markdown_editor_affiliate_notice_interval', 'off', $value * DAY_IN_SECONDS );
-			}
-
-			update_option( sanitize_key( 'wp_markdown_editor_notices' ), [] );
-
-		}
 
 		/**
 		 * Load footer scripts
 		 *
 		 * @return  void
 		 */
-		public function footer_scripts() { ?>
+		public function footer_scripts() {
+			?>
 			<script>
 				;(function () {
 					var is_saved = localStorage.getItem('dark_mode_active');
@@ -141,59 +81,11 @@ if ( ! class_exists( 'Dark_Mode_Hooks' ) ) {
 		 */
 		public function handle_update_notice() {
 			update_option( 'wp_markdown_editor_update_notice_interval', 'off' );
-			update_option( sanitize_key( 'wp_markdown_editor_notices' ), [] );
+			update_option(
+				sanitize_key( 'wp_markdown_editor_notices' ),
+				array()
+			);
 			die();
-		}
-
-		/**
-		 * Display notice
-		 *
-		 * @return void
-		 */
-		public function display_notice() {
-
-			// Return if allow tracking is not interacted yet.
-			if ( ! get_option( 'dark-mode_allow_tracking' ) ) {
-				return;
-			}
-
-			// Update Notice.
-			if ( 'off' !== get_option( 'wp_markdown_editor_update_notice_interval', 'on' ) ) {
-
-				$notice = '<p>WP Markdown Editor (formerly Dark Mode) has now additional settings that you can turn off. </p> 
-                <a style="margin-bottom: 8px;" href="' . admin_url( 'options-general.php?page=wp-markdown-settings' )
-					. '" class="button-primary">Explore Now</a> ';
-
-				wpmd_add_notice( 'info is-dismissible wp-markdown-editor-update-notice', $notice );
-			}
-
-			if ( 'off' !== get_option( 'wp_markdown_editor_update_notice_interval', 'on' ) ) {
-				return;
-			}
-
-				// Review notice.
-			if ( 'off' !== get_option( 'wp_markdown_editor_review_notice_interval', 'on' )
-				&& 'off' !== get_transient( 'wp_markdown_editor_review_notice_interval' ) ) {
-
-				ob_start();
-				include_once DARK_MODE_PATH . '/includes/notices/review-notice.php';
-				$notice_html = ob_get_clean();
-
-				wpmd_add_notice( 'info is-dismissible wp-markdown-editor-review-notice', $notice_html );
-			}
-
-			// Affiliate notice.
-			if ( 'off' === get_option( 'wp_markdown_editor_review_notice_interval' )
-				&& 'off' !== get_option( 'wp_markdown_editor_affiliate_notice_interval', 'on' )
-				&& 'off' !== get_transient( 'wp_markdown_editor_affiliate_notice_interval' ) ) {
-
-				ob_start();
-				include_once DARK_MODE_PATH . '/includes/notices/affiliate-notice.php';
-				$notice_html = ob_get_clean();
-
-				wpmd_add_notice( 'info is-dismissible wp-markdown-editor-affiliate-notice', $notice_html );
-			}
-
 		}
 
 		/**
@@ -299,17 +191,23 @@ if ( ! class_exists( 'Dark_Mode_Hooks' ) ) {
 			$dark_text  = __( 'Dark', 'dark-mode' );
 
 			global $wp_admin_bar;
-			$wp_admin_bar->add_menu( [
-				'id'    => 'dark-mode-switch',
-				'title' => sprintf( '<div class="dark-mode-switch dark-mode-ignore">
-	                                    <div class="toggle dark-mode-ignore"></div>
-	                                    <div class="modes dark-mode-ignore">
-	                                        <p class="light dark-mode-ignore">%s</p>
-	                                        <p class="dark dark-mode-ignore">%s</p>
-	                                    </div>
-	                            	</div>', $light_text, $dark_text ),
-				'href'  => '#',
-			] );
+			$wp_admin_bar->add_menu(
+				array(
+					'id'    => 'dark-mode-switch',
+					'title' => sprintf(
+						'<div class="dark-mode-switch dark-mode-ignore">
+							<div class="toggle dark-mode-ignore"></div>
+							<div class="modes dark-mode-ignore">
+								<p class="light dark-mode-ignore">%s</p>
+								<p class="dark dark-mode-ignore">%s</p>
+							</div>
+						</div>',
+						$light_text,
+						$dark_text
+					),
+					'href'  => '#',
+				)
+			);
 		}
 
 		/**

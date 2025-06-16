@@ -1,4 +1,4 @@
-<?php //phpcs:ignore
+<?php
 /**
  * If direct access than exit the file.
  *
@@ -37,9 +37,7 @@ if ( ! class_exists( 'Dark_Mode_Install' ) ) {
 			if ( ! $updater->needs_update() ) {
 				self::create_default_data();
 			}
-
 		}
-
 
 		/**
 		 * Create default data
@@ -58,7 +56,6 @@ if ( ! class_exists( 'Dark_Mode_Install' ) ) {
 
 			set_transient( 'wp_markdown_editor_review_notice_interval', 'off', 3 * DAY_IN_SECONDS );
 			set_transient( 'wp_markdown_editor_affiliate_notice_interval', 'off', 3 * DAY_IN_SECONDS );
-
 		}
 
 		/**
@@ -73,7 +70,6 @@ if ( ! class_exists( 'Dark_Mode_Install' ) ) {
 
 			return self::$instance;
 		}
-
 	}
 }
 

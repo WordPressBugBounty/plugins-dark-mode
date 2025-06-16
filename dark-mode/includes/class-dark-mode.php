@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit();
 /**
  * Dark Mode Class
  */
-final class Dark_Mode {
+class Dark_Mode {
 	/**
 	 * A reference to an instance of this class.
 	 *
@@ -33,14 +33,24 @@ final class Dark_Mode {
 	 */
 	public function __construct() {
 		$this->includes();
-		$this->wp_markdown_wppool_sdk_init();
 
-		add_action( 'plugins_loaded', array( $this, 'load_text_domain' ), 10, 0 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ), 99, 0 );
+		add_action(
+			'admin_enqueue_scripts',
+			array( $this, 'admin_scripts' ),
+			99,
+			0
+		);
 
-		add_filter( 'plugin_action_links_' . plugin_basename( DARK_MODE_FILE ), array( $this, 'plugin_action_links' ) );
+		add_filter(
+			'plugin_action_links_' . plugin_basename( DARK_MODE_FILE ),
+			array( $this, 'plugin_action_links' )
+		);
 
-		add_action( 'admin_notices', array( $this, 'print_notices' ), 15 );
+		add_action(
+			'admin_notices',
+			array( $this, 'print_notices' ),
+			15
+		);
 		// phpcs:ignore
 		// add_filter( 'admin_body_class', array( $this, 'add_body_class' ), 10, 1 );
 	}
@@ -66,13 +76,19 @@ final class Dark_Mode {
 	 * @return void
 	 */
 	public function print_notices() {
-		$notices = get_option( sanitize_key( 'wp_markdown_editor_notices' ), array() );
+		$notices = get_option(
+			sanitize_key( 'wp_markdown_editor_notices' ),
+			array()
+		);
 		foreach ( $notices as $notice ) { ?>
 			<div class="notice notice-<?php echo esc_attr( $notice['class'] ); ?>">
 				<?php echo wp_kses_post( $notice['message'] ); ?>
 			</div>
 			<?php
-			update_option( sanitize_key( 'wp_markdown_editor_notices' ), array() );
+			update_option(
+				sanitize_key( 'wp_markdown_editor_notices' ),
+				array()
+			);
 		}
 	}
 
@@ -96,16 +112,6 @@ final class Dark_Mode {
 	}
 
 	/**
-	 * Load the plugin text domain.
-	 *
-	 * @return void
-	 * @since 1.0
-	 */
-	public function load_text_domain() {
-		load_plugin_textdomain( 'dark-mode', false, untrailingslashit( __DIR__ ) . '/languages' );
-	}
-
-	/**
 	 * Add the scripts to the dashboard if enabled.
 	 *
 	 * @return void
@@ -114,9 +120,20 @@ final class Dark_Mode {
 	 * @since 1.0
 	 */
 	public function admin_scripts() {
-		wp_enqueue_style( 'wp-markdown-editor-admin', DARK_MODE_URL . 'assets/css/admin.css', false, DARK_MODE_VERSION );
+		wp_enqueue_style(
+			'wp-markdown-editor-admin',
+			DARK_MODE_URL . 'assets/css/admin.css',
+			false,
+			DARK_MODE_VERSION
+		);
 
-		wp_enqueue_script( 'jquery.syotimer', DARK_MODE_URL . 'assets/js/jquery.syotimer.min.js', array( 'jquery' ), '2.1.2', true );
+		wp_enqueue_script(
+			'jquery.syotimer',
+			DARK_MODE_URL . 'assets/js/jquery.syotimer.min.js',
+			array( 'jquery' ),
+			'2.1.2',
+			true
+		);
 		wp_enqueue_script(
 			'wp-markdown-editor-admin',
 			DARK_MODE_URL . 'assets/js/admin.min.js',
@@ -160,44 +177,7 @@ final class Dark_Mode {
 			__( 'Settings', 'dark-mode' )
 		);
 
-		if ( ! $this->is_pro_active() ) {
-			$links[] = sprintf(
-				'<a href="%1$s" style="color: orangered;font-weight: bold;">%2$s</a>',
-				'https://wppool.dev/wp-markdown-editor',
-				__( 'GET PRO', 'dark-mode' )
-			);
-		}
-
 		return $links;
-	}
-
-	/**
-	 * Initialize the wppool sdk
-	 *
-	 * @return void
-	 */
-	public function wp_markdown_wppool_sdk_init() {
-		// Require WPPOOL SDK files.
-		if ( file_exists( DARK_MODE_INCLUDES . 'wppool/class-plugin.php' ) ) {
-			require_once DARK_MODE_INCLUDES . 'wppool/class-plugin.php';
-		}
-
-		if ( function_exists( 'wppool_plugin_init' ) ) {
-			$wp_markdown_plugin;
-
-			if ( 'wp-markdown' === PLUGIN_DIR_NAME ) {
-				$wp_markdown_plugin = wppool_plugin_init( 'wp_markdown', plugin_dir_url( DARK_MODE_FILE ) . '/includes/wppool/background-image.png' );
-			} elseif ( 'dark-mode' === PLUGIN_DIR_NAME ) {
-				$wp_markdown_plugin = wppool_plugin_init( 'dark_mode', plugin_dir_url( DARK_MODE_FILE ) . '/includes/wppool/background-image.png' );
-			}
-
-			if ( $wp_markdown_plugin && is_object( $wp_markdown_plugin ) && method_exists( $wp_markdown_plugin, 'set_campaign' ) ) {
-				$to            = '2023-11-27';
-				$from          = '2023-11-16';
-				$campain_image = plugin_dir_url( DARK_MODE_FILE ) . '/includes/wppool/black-friday.png';
-				$wp_markdown_plugin->set_campaign( $campain_image, $to, $from );
-			}
-		}
 	}
 
 	/**

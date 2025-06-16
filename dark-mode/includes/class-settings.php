@@ -1,4 +1,5 @@
 <?php //phpcs:ignore
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 /**
  * If direct access than exit the file.
  *
@@ -29,8 +30,14 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 		 * WPMDE_Settings constructor.
 		 */
 		public function __construct() {
-			add_action( 'admin_init', [ $this, 'settings_fields' ] );
-			add_action( 'admin_menu', [ $this, 'settings_menu' ] );
+			add_action(
+				'admin_init',
+				array( $this, 'settings_fields' )
+			);
+			add_action(
+				'admin_menu',
+				array( $this, 'settings_menu' )
+			);
 		}
 
 
@@ -39,64 +46,63 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 		 */
 		public function settings_fields() {
 
-			$sections = [
-				[
+			$sections = array(
+				array(
 					'id'    => 'wpmde_general',
-					//phpcs:ignore
-					'title' => sprintf( __( '%s <span>General Settings</span>', 'dark-mode' ),
-					'<i class="dashicons dashicons-admin-generic" ></i>' ),
-				],
+					// translators: %s is replaced with dashicon HTML for General Settings tab.
+					'title' => sprintf(
+						'%s <span>General Settings</span>',
+						'<i class="dashicons dashicons-admin-generic"></i>'
+					),
+				),
+			);
 
-				'wpmde_license' => [
-					'id'    => 'wpmde_license',
-					//phpcs:ignore
-					'title' => sprintf( __( '%s <span>License Activation</span>', 'dark-mode' ),
-					'<i class="dashicons dashicons-admin-tools" ></i>' ),
-				],
+			$fields = array(
 
-			];
+				'wpmde_general' => array(
 
-			$fields = [
+					'only_darkmode'      => array(
+						'name'     => 'only_darkmode',
+						'default'  => 'off',  // Changed from 'on' to 'off'.
+						'label'    => __( 'Only Dark Mode', 'dark-mode' ),
+						'desc'     => __( 'Turn ON to disable all the features of this plugin except Dark Mode.', 'dark-mode' ),
+						'type'     => 'switcher',
+						'upcoming' => true,
+					),
 
-				'wpmde_general' => [
+					'markdown_editor'    => array(
+						'name'     => 'markdown_editor',
+						'default'  => 'off',
+						'label'    => __( 'Enable Markdown Editor', 'dark-mode' ),
+						'desc'     => __( 'Enable/disable The Markdown Editor.', 'dark-mode' ),
+						'type'     => 'switcher',
+						'upcoming' => true,
+					),
 
-					'only_darkmode'      => [
-						'name'    => 'only_darkmode',
-						'default' => 'on',
-						'label'   => __( 'Only Dark Mode', 'dark-mode' ),
-						'desc'    => __( 'Turn ON to disable all the features of this plugin except Dark Mode.', 'dark-mode' ),
-						'type'    => 'switcher',
-					],
-
-					'markdown_editor'    => [
-						'name'    => 'markdown_editor',
-						'default' => 'off',
-						'label'   => __( 'Enable Markdown Editor', 'dark-mode' ),
-						'desc'    => __( 'Enable/disable The Markdown Editor.', 'dark-mode' ),
-						'type'    => 'switcher',
-					],
-
-					'admin_darkmode'     => [
+					'admin_darkmode'     => array(
 						'name'    => 'admin_darkmode',
 						'default' => 'on',
 						'label'   => __( 'Enable Admin Darkmode', 'dark-mode' ),
 						'desc'    => __( 'Enable/disable Darkmode in the admin dashboard.', 'dark-mode' ),
 						'type'    => 'switcher',
-					],
+					),
 
+					'productivity_sound' => array(
+						'name'     => 'productivity_sound',
+						'default'  => 'off',  // Changed from 'on' to 'off'.
+						'label'    => __( 'Enable Productivity Sounds', 'dark-mode' ),
+						'desc'     => __( 'Enable/disable productivity sounds in the admin dashboard.', 'dark-mode' ),
+						'type'     => 'switcher',
+						'upcoming' => true,
+					),
+
+					// Commented out fields from your original code.
 					//phpcs:ignore
-					// 'gutenberg_darkmode'      => [],
+					// 'gutenberg_darkmode'      => array(),
 					//
-					// 'classic_editor_darkmode' => [],
+					// 'classic_editor_darkmode' => array(),
 
-					'productivity_sound' => [
-						'name'    => 'productivity_sound',
-						'default' => 'on',
-						'label'   => __( 'Enable Productivity Sounds', 'dark-mode' ),
-						'desc'    => __( 'Enable/disable productivity sounds in the admin dashboard.', 'dark-mode' ),
-						'type'    => 'switcher',
-					],
-
+					// Commented out new_fonts field from your original code.
 					//phpcs:ignore
 					// 'new_fonts' => array(
 					// 'name'      => 'new_fonts',
@@ -106,20 +112,9 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 					// 'type'      => 'switcher',
 					// ),
 
-				],
+				),
 
-				'wpmde_license' => [
-					'license' => [
-						'name'    => 'license',
-						'default' => [ $this, 'license_output' ],
-						'type'    => 'cb_function',
-					],
-				],
-			];
-
-			if ( ! class_exists( 'WP_Markdown_Editor_Pro' ) ) {
-				unset( $sections['wpmde_license'] );
-			}
+			);
 
 			//phpcs:ignore
 			// if ( wpmde_is_classic_editor_plugin_active() ) {
@@ -174,8 +169,13 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 		 * Register the plugin page
 		 */
 		public function settings_menu() {
-			add_options_page( 'WP Markdown Editor Settings', 'WP Markdown Editor', 'manage_options', 'wp-markdown-settings',
-			[ $this, 'settings_page' ] );
+			add_options_page(
+				'WP Markdown Editor Settings',
+				'WP Markdown Editor',
+				'manage_options',
+				'wp-markdown-settings',
+				array( $this, 'settings_page' )
+			);
 		}
 
 		/**
@@ -191,7 +191,6 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 					<?php self::$settings_api->show_settings(); ?>
 				</div>
 			<?php
-
 		}
 
 		/**
@@ -206,7 +205,6 @@ if ( ! class_exists( 'WPMDE_Settings' ) ) {
 
 			return self::$instance;
 		}
-
 	}
 }
 

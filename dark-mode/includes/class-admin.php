@@ -24,7 +24,7 @@ if ( ! class_exists( 'Dark_Mode_Admin' ) ) {
 		 * Dark_Mode_Admin constructor.
 		 */
 		public function __construct() {
-			add_action( 'admin_init', [ $this, 'init_update' ] );
+			add_action( 'admin_init', array( $this, 'init_update' ) );
 		}
 
 		/**

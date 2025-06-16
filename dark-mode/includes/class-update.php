@@ -17,7 +17,7 @@ class WP_Markdown_Editor_Update {
 	 *
 	 * @var array
 	 */
-	private static $upgrades = [];
+	private static $upgrades = array();
 
 	/**
 	 * Get Installed version
