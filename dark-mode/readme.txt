@@ -2,8 +2,8 @@
 Contributors: wppool, azizultex, devfaysal, abrasel600
 Tags: dark mode, markdown, editor, admin theme, dashboard
 Requires at least: 6.2
-Tested up to: 6.8
-Stable tag: 4.2.0
+Tested up to: 6.9
+Stable tag: 4.2.1
 Requires PHP: 7.4
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,7 +16,7 @@ This plugin does not connect to any third-party or external services.
 
 == Description ==
 
-If you want to quickly edit content in WordPress without thinking about blocks, Markdown Editor  is the perfect choice for you! Get an immersive, peaceful and natural writing experience with the coolest editor - Markdown Editor.
+If you want to quickly edit content in WordPress without thinking about blocks, Markdown Editor  is the choice for you! Get an immersive, peaceful and natural writing experience with the coolest editor - Markdown Editor.
 Whether you are a Markdown fan or newbie as a Markdown writer, you will love Markdown Editor. This is the simplest plugin for a developer to write content in WordPress.
 
 Using technology at night time can have a negative effect on your eyesight.
@@ -89,6 +89,9 @@ Markdown Editor is a developer's way of writing content. Developers or coding fo
 9. Admin Dashboard in Dark Mode.
 
 == Changelog ==
+
+= 4.2.1 =
+* Improvement: Enhanced compatibility to support WordPress 6.9
 
 = 4.2.0 =
 * Improvement: Resolved all coding standard issues to improve code quality, compliance, and compatibility.

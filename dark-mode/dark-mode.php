@@ -6,8 +6,8 @@
  * Author: WPPOOL
  * Author URI: https://wppool.dev
  * Text Domain: dark-mode
- * Version: 4.2.0
- * Tested up to: 6.8
+ * Version: 4.2.1
+ * Tested up to: 6.9
  * Requires at least: 6.2
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@
 defined( 'ABSPATH' ) || exit();
 
 if ( ! class_exists( 'Dark_Mode' ) ) {
-	define( 'DARK_MODE_VERSION', '4.2.0' );
+	define( 'DARK_MODE_VERSION', '4.2.1' );
 	define( 'DARK_MODE_FILE', __FILE__ );
 	define( 'DARK_MODE_PATH', plugin_dir_path( DARK_MODE_FILE ) );
 	define( 'DARK_MODE_INCLUDES', DARK_MODE_PATH . '/includes' );
